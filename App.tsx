@@ -116,7 +116,7 @@ const App: React.FC = () => {
 
   if (!originalImage) {
     return (
-      <main className="h-screen w-screen">
+      <main className="w-full min-h-screen">
         <ImageUploader onImageUpload={handleImageUpload} />
       </main>
     );
