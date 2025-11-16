@@ -1,15 +1,21 @@
-
 import { GoogleGenAI, Modality, Type } from "@google/genai";
 import { ShoppingItem } from '../types';
 
-const API_KEY = process.env.API_KEY;
+let aiInstance: GoogleGenAI | null = null;
 
-if (!API_KEY) {
-  // This is a placeholder check. In a real environment, the key would be set.
-  console.warn("API_KEY environment variable not set. Using a placeholder.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const getAiClient = (): GoogleGenAI => {
+    if (aiInstance) {
+        return aiInstance;
+    }
+    
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("API_KEY is not configured. Please ensure it is set in your deployment environment variables.");
+    }
+    
+    aiInstance = new GoogleGenAI({ apiKey });
+    return aiInstance;
+};
 
 const fileToGenerativePart = (base64: string, mimeType: string) => {
   return {
@@ -21,6 +27,7 @@ const fileToGenerativePart = (base64: string, mimeType: string) => {
 };
 
 export const generateImage = async (base64Image: string, mimeType: string, prompt: string): Promise<string> => {
+    const ai = getAiClient();
     const imagePart = fileToGenerativePart(base64Image, mimeType);
     const textPart = { text: prompt };
 
@@ -44,12 +51,16 @@ export const generateImage = async (base64Image: string, mimeType: string, promp
 
     } catch (error) {
         console.error("Error generating image:", error);
+        if (error instanceof Error) {
+            throw new Error(`Failed to generate image: ${error.message}`);
+        }
         throw new Error("Failed to generate image. Please check the console for more details.");
     }
 };
 
 
 export const getShoppingSuggestions = async (prompt: string): Promise<ShoppingItem[]> => {
+    const ai = getAiClient();
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
@@ -90,6 +101,7 @@ export const getShoppingSuggestions = async (prompt: string): Promise<ShoppingIt
 };
 
 export const classifyChatIntent = async (prompt: string): Promise<'visual' | 'shopping' | 'general'> => {
+  const ai = getAiClient();
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -106,6 +118,7 @@ export const classifyChatIntent = async (prompt: string): Promise<'visual' | 'sh
 }
 
 export const getGeneralChatResponse = async (prompt: string): Promise<string> => {
+    const ai = getAiClient();
     try {
         const chat = ai.chats.create({ model: 'gemini-2.5-flash' });
         const response = await chat.sendMessage({ message: prompt });

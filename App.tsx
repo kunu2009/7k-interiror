@@ -4,6 +4,7 @@ import StyleSelector from './components/StyleSelector';
 import ImageComparator from './components/ImageComparator';
 import ChatInterface from './components/ChatInterface';
 import ShoppingList from './components/ShoppingList';
+import ImageHistory from './components/ImageHistory';
 import { generateImage, getShoppingSuggestions, classifyChatIntent, getGeneralChatResponse } from './services/geminiService';
 import { ChatMessage, ShoppingItem } from './types';
 import { SparklesIcon } from './components/icons';
@@ -16,6 +17,7 @@ interface UploadedImage {
 const App: React.FC = () => {
   const [originalImage, setOriginalImage] = useState<UploadedImage | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [imageHistory, setImageHistory] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +39,7 @@ const App: React.FC = () => {
   const handleImageUpload = (base64: string, file: File) => {
     setOriginalImage({ base64, file });
     setGeneratedImage(null);
+    setImageHistory([]);
     setChatHistory([{ sender: 'ai', text: "Great! I've got your image. What style are you envisioning for your space?" }]);
   };
 
@@ -49,6 +52,7 @@ const App: React.FC = () => {
       const prompt = `Reimagine this entire room in a ${style} interior design style. Maintain the original room layout and architecture but change the furniture, colors, lighting, and decor to fit the style.`;
       const newImage = await generateImage(originalImage.base64, originalImage.file.type, prompt);
       setGeneratedImage(newImage);
+      setImageHistory(prev => [...prev, newImage]);
       setChatHistory(prev => [...prev, { sender: 'ai', text: `Here's a ${style} version of your room! You can use the slider to compare. What do you think? Feel free to ask for changes.`}])
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred.');
@@ -70,6 +74,7 @@ const App: React.FC = () => {
             setLoadingMessage('Applying your changes to the image...');
             const newImage = await generateImage(imageForEditing, fileType, message);
             setGeneratedImage(newImage);
+            setImageHistory(prev => [...prev, newImage]);
             setChatHistory(prev => [...prev, { sender: 'ai', text: 'Done! What do you think of this version?' }]);
         } else if (intent === 'shopping') {
             setLoadingMessage('Searching for product ideas...');
@@ -131,6 +136,10 @@ const App: React.FC = () => {
       setShoppingList([]);
       localStorage.removeItem('shoppingList');
   };
+  
+  const handleSelectFromHistory = (image: string) => {
+    setGeneratedImage(image);
+  };
 
   if (!originalImage) {
     return (
@@ -163,6 +172,11 @@ const App: React.FC = () => {
                 <ImageComparator original={originalImage.base64} generated={generatedImage} onDownload={handleDownloadImage} />
             )}
           </div>
+          <ImageHistory 
+              history={imageHistory}
+              currentImage={generatedImage}
+              onSelect={handleSelectFromHistory}
+          />
         </div>
         
         <div className="flex flex-col gap-4 min-h-0">
