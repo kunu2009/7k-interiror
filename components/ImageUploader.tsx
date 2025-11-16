@@ -1,7 +1,7 @@
-
 import React, { useCallback, useState } from 'react';
 import { UploadIcon } from './icons';
 import InspirationGallery from './InspirationGallery';
+import InspirationGenerator from './InspirationGenerator';
 
 interface ImageUploaderProps {
   onImageUpload: (base64: string, file: File) => void;
@@ -79,6 +79,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageUpload }) => {
           </label>
         </div>
       </div>
+      <InspirationGenerator />
       <InspirationGallery />
     </>
   );
