@@ -1,12 +1,13 @@
-
 import React, { useState, useRef, useEffect } from 'react';
+import { DownloadIcon } from './icons';
 
 interface ImageComparatorProps {
   original: string;
   generated: string;
+  onDownload: () => void;
 }
 
-const ImageComparator: React.FC<ImageComparatorProps> = ({ original, generated }) => {
+const ImageComparator: React.FC<ImageComparatorProps> = ({ original, generated, onDownload }) => {
   const [sliderPos, setSliderPos] = useState(50);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   
@@ -64,6 +65,15 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({ original, generated }
       >
         REIMAGINED
       </div>
+
+      <button
+        onClick={onDownload}
+        className="absolute bottom-4 right-4 z-10 flex items-center gap-2 px-4 py-2 bg-gray-900/60 backdrop-blur-sm text-white rounded-full hover:bg-gray-900/80 transition-colors"
+        aria-label="Download reimagined image"
+      >
+        <DownloadIcon className="w-5 h-5" />
+        <span>Download</span>
+      </button>
     </div>
   );
 };

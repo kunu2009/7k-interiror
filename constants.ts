@@ -9,6 +9,13 @@ export const DESIGN_STYLES = [
   "Art Deco",
   "Modern Farmhouse",
   "Japandi",
+  "Victorian",
+  "Art Nouveau",
+  "Shabby Chic",
+  "Rustic",
+  "Tropical",
+  "Southwestern",
+  "Eclectic",
 ];
 
 export const GALLERY_ITEMS = [

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import ImageUploader from './components/ImageUploader';
 import StyleSelector from './components/StyleSelector';
@@ -90,6 +89,25 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDownloadImage = () => {
+    if (!generatedImage) return;
+
+    const link = document.createElement('a');
+    link.href = generatedImage;
+    
+    const mimeTypeMatch = generatedImage.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,.*/);
+    let extension = 'png';
+    if (mimeTypeMatch && mimeTypeMatch.length > 1) {
+      extension = mimeTypeMatch[1].split('/')[1];
+    }
+    
+    link.download = `reimagined-room.${extension}`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleAddToShoppingList = (itemToAdd: ShoppingItem) => {
     setShoppingList(prevList => {
         if (prevList.some(item => item.url === itemToAdd.url)) {
@@ -142,7 +160,7 @@ const App: React.FC = () => {
                     <img src={originalImage.base64} alt="Original Room" className="max-h-full max-w-full" />
                 </div>
             ) : (
-                <ImageComparator original={originalImage.base64} generated={generatedImage} />
+                <ImageComparator original={originalImage.base64} generated={generatedImage} onDownload={handleDownloadImage} />
             )}
           </div>
         </div>
